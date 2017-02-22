@@ -2,22 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a4d959b3-981f-42f5-a208-7697c4c5b2c2" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/VN/com/lx/ARAlgorithm.class" afterPath="$PROJECT_DIR$/out/production/VN/com/lx/ARAlgorithm.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/VN/com/lx/BaseAlgorithm.class" afterPath="$PROJECT_DIR$/out/production/VN/com/lx/BaseAlgorithm.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/VN/com/lx/HARAlgorithm$1.class" afterPath="$PROJECT_DIR$/out/production/VN/com/lx/HARAlgorithm$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/VN/com/lx/HARAlgorithm.class" afterPath="$PROJECT_DIR$/out/production/VN/com/lx/HARAlgorithm.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/VN/com/lx/MergeVNAlgorithm.class" afterPath="$PROJECT_DIR$/out/production/VN/com/lx/MergeVNAlgorithm.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/VN/com/lx/Node.class" afterPath="$PROJECT_DIR$/out/production/VN/com/lx/Node.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/VN/com/lx/Yen_ARAlgorithm$1.class" afterPath="$PROJECT_DIR$/out/production/VN/com/lx/Yen_ARAlgorithm$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/VN/com/lx/Yen_ARAlgorithm.class" afterPath="$PROJECT_DIR$/out/production/VN/com/lx/Yen_ARAlgorithm.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/lx/ARAlgorithm.java" afterPath="$PROJECT_DIR$/src/com/lx/ARAlgorithm.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/lx/BaseAlgorithm.java" afterPath="$PROJECT_DIR$/src/com/lx/BaseAlgorithm.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/lx/HARAlgorithm.java" afterPath="$PROJECT_DIR$/src/com/lx/HARAlgorithm.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/lx/Main.java" afterPath="$PROJECT_DIR$/src/com/lx/Main.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/lx/MergeVNAlgorithm.java" afterPath="$PROJECT_DIR$/src/com/lx/MergeVNAlgorithm.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/lx/Node.java" afterPath="$PROJECT_DIR$/src/com/lx/Node.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/lx/Yen_ARAlgorithm.java" afterPath="$PROJECT_DIR$/src/com/lx/Yen_ARAlgorithm.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/lx/BaseAlgorithm1.java" afterPath="$PROJECT_DIR$/src/com/lx/BaseAlgorithm1.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -81,8 +66,8 @@
       <file leaf-file-name="BaseAlgorithm1.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/lx/BaseAlgorithm1.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="186" column="13" lean-forward="true" selection-start-line="186" selection-start-column="13" selection-end-line="186" selection-end-column="13" />
+            <state relative-caret-position="372">
+              <caret line="163" column="38" lean-forward="false" selection-start-line="163" selection-start-column="38" selection-end-line="163" selection-end-column="38" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -564,7 +549,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="57" y="24" width="1863" height="1056" extended-state="7" />
+    <frame x="57" y="24" width="1863" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1041,8 +1026,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/lx/BaseAlgorithm1.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="186" column="13" lean-forward="true" selection-start-line="186" selection-start-column="13" selection-end-line="186" selection-end-column="13" />
+        <state relative-caret-position="372">
+          <caret line="163" column="38" lean-forward="false" selection-start-line="163" selection-start-column="38" selection-end-line="163" selection-end-column="38" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

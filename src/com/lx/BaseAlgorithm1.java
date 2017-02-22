@@ -161,7 +161,7 @@ public class BaseAlgorithm1 {
         }
         int successednode = -1;
         int k = 0;
-        while(queue.isEmpty() == false || k > 3){
+        while(queue.isEmpty() == false){
             Queue<Pair> queue1 = new PriorityQueue<>(Pair.comparator);
             while(queue.isEmpty() == false){
                 Pair pair = (Pair) queue.poll();
