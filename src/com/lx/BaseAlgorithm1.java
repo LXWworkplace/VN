@@ -32,84 +32,91 @@ public class BaseAlgorithm1 {
     }
 
     public void Deploy(){
-        for(int i = 0; i < utils.VG.Node; i ++){
-            for(int j = i; j < utils.VG.Node; j ++){
-                if(utils.VG.EdgeCapacity[i][j] > 0){
-                    boolean Successed = false;
-                    List path = new ArrayList<Integer>();
-                    if(VN2PN[i] != -1 && VN2PN[j] != -1){
-                        Successed = TwoNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),path);
-                        if(Successed == false)
-                            System.out.println("Type 1 failed  there is not enougn BD from " + VN2PN[i] + "  to  " + VN2PN[j]);
-                        else{
-                            for(int k = 0; k < path.size() - 1; k ++){
-                                int from = (Integer)path.get(k);
-                                int to = (Integer)path.get(k+1);
-                                PGFreeBandwidth[from][to] -= utils.VG.EdgeCapacity[i][j];
-                                PGFreeBandwidth[to][from] -= utils.VG.EdgeCapacity[i][j];
-                            }
-                            System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 1");
-                        }
-                    }
-                    else if((VN2PN[i] == -1 && VN2PN[j] != -1) || (VN2PN[i] != -1 && VN2PN[j] == -1)){
-                        if(VN2PN[i] == -1)
-                            Successed = OneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),i,VN2PN[j],path);
-                        else
-                            Successed = OneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),j,VN2PN[i],path);
-                        if(Successed == false)
-                            System.out.println("Type 2 failed  cant find appropriate path " +  i  +"  to  " + j);
-                        else{
-                            int pnode = (Integer) path.get(path.size()-1);
-                            if(VN2PN[i] == -1) {
-                                VN2PN[i] = pnode;
-                                PGFreeCapacity[pnode] -= utils.VG.NodeCapacity[i];
-                            }
-                            else {
-                                VN2PN[j] = pnode;
-                                PGFreeCapacity[pnode] -= utils.VG.NodeCapacity[j];
-                            }
-                            for(int k = 0; k < path.size() - 1; k ++){
-                                int from = (Integer)path.get(k);
-                                int to = (Integer)path.get(k+1);
-                                PGFreeBandwidth[from][to] -= utils.VG.EdgeCapacity[i][j];
-                                PGFreeBandwidth[to][from] -= utils.VG.EdgeCapacity[i][j];
-                            }
-                            System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 2");
-                        }
-                    }
-                    else{
-                        Link Plink[] = new Link[1];
-                        Successed = NoneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),Plink);
-                        if(Successed == false){
-
-                            System.out.println("Type 3 failed  cant find appropriate path " +  i  +"  to  " + j);
-                        }
-                        else{
-                            int maxid = Plink[0].From;
-                            int minid = Plink[0].To;
-                            if(PGFreeCapacity[maxid] < PGFreeCapacity[minid]) {
-                                int swap = maxid;
-                                maxid = minid;
-                                minid = swap;
-                            }
-                            int vmaxid = i;
-                            int vminid = j;
-                            if(utils.VG.NodeCapacity[i] < utils.VG.NodeCapacity[j]){
-                                int swap = vmaxid;
-                                vmaxid = vminid;
-                                vminid = swap;
-                            }
-                            VN2PN[vmaxid] = maxid;
-                            VN2PN[vminid] = minid;
-                            PGFreeCapacity[maxid] -= utils.VG.NodeCapacity[vmaxid];
-                            PGFreeCapacity[minid] -= utils.VG.NodeCapacity[vminid];
-                            PGFreeBandwidth[maxid][minid] -= utils.VG.EdgeCapacity[i][j];
-                            PGFreeBandwidth[minid][maxid] -= utils.VG.EdgeCapacity[i][j];
-                            System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 3");
-                        }
-
-                    }
+        Queue<Link> Linkqueue = new PriorityQueue<>(Link.comparator);
+        for(int i = 0; i < utils.VG.Node; i ++) {
+            for (int j = i; j < utils.VG.Node; j++) {
+                if (utils.VG.EdgeCapacity[i][j] > 0) {
+                    Linkqueue.offer(new Link(i, j, utils.VG.EdgeCapacity[i][j]));
                 }
+            }
+        }
+        while(Linkqueue.isEmpty() == false){
+            Link Linktmp = Linkqueue.poll();
+            int i = Linktmp.From;
+            int j = Linktmp.To;
+            boolean Successed = false;
+            List path = new ArrayList<Integer>();
+            if(VN2PN[i] != -1 && VN2PN[j] != -1){
+                Successed = TwoNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),path);
+                if(Successed == false)
+                    System.out.println("Type 1 failed  there is not enougn BD from " + VN2PN[i] + "  to  " + VN2PN[j]);
+                else{
+                    for(int k = 0; k < path.size() - 1; k ++){
+                        int from = (Integer)path.get(k);
+                        int to = (Integer)path.get(k+1);
+                        PGFreeBandwidth[from][to] -= utils.VG.EdgeCapacity[i][j];
+                        PGFreeBandwidth[to][from] -= utils.VG.EdgeCapacity[i][j];
+                    }
+                    System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 1");
+                }
+            }
+            else if((VN2PN[i] == -1 && VN2PN[j] != -1) || (VN2PN[i] != -1 && VN2PN[j] == -1)){
+                if(VN2PN[i] == -1)
+                    Successed = OneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),i,VN2PN[j],path);
+                else
+                    Successed = OneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),j,VN2PN[i],path);
+                if(Successed == false)
+                    System.out.println("Type 2 failed  cant find appropriate path " +  i  +"  to  " + j);
+                else{
+                    int pnode = (Integer) path.get(path.size()-1);
+                    if(VN2PN[i] == -1) {
+                        VN2PN[i] = pnode;
+                        PGFreeCapacity[pnode] -= utils.VG.NodeCapacity[i];
+                    }
+                    else {
+                        VN2PN[j] = pnode;
+                        PGFreeCapacity[pnode] -= utils.VG.NodeCapacity[j];
+                    }
+                    for(int k = 0; k < path.size() - 1; k ++){
+                        int from = (Integer)path.get(k);
+                        int to = (Integer)path.get(k+1);
+                        PGFreeBandwidth[from][to] -= utils.VG.EdgeCapacity[i][j];
+                        PGFreeBandwidth[to][from] -= utils.VG.EdgeCapacity[i][j];
+                    }
+                    System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 2");
+                }
+            }
+            else{
+                Link Plink[] = new Link[1];
+                Successed = NoneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),Plink);
+                if(Successed == false){
+
+                    System.out.println("Type 3 failed  cant find appropriate path " +  i  +"  to  " + j);
+                }
+                else{
+                    int maxid = Plink[0].From;
+                    int minid = Plink[0].To;
+                    if(PGFreeCapacity[maxid] < PGFreeCapacity[minid]) {
+                        int swap = maxid;
+                        maxid = minid;
+                        minid = swap;
+                    }
+                    int vmaxid = i;
+                    int vminid = j;
+                    if(utils.VG.NodeCapacity[i] < utils.VG.NodeCapacity[j]){
+                        int swap = vmaxid;
+                        vmaxid = vminid;
+                        vminid = swap;
+                    }
+                    VN2PN[vmaxid] = maxid;
+                    VN2PN[vminid] = minid;
+                    PGFreeCapacity[maxid] -= utils.VG.NodeCapacity[vmaxid];
+                    PGFreeCapacity[minid] -= utils.VG.NodeCapacity[vminid];
+                    PGFreeBandwidth[maxid][minid] -= utils.VG.EdgeCapacity[i][j];
+                    PGFreeBandwidth[minid][maxid] -= utils.VG.EdgeCapacity[i][j];
+                    System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 3");
+                }
+
             }
         }
 
