@@ -4,6 +4,7 @@ import java.util.Comparator;
 
 /**
  * Created by lx on 17-2-16.
+ * Used in HAR
  */
 public class Node {
     public int Capacity;

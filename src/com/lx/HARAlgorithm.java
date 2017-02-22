@@ -4,6 +4,7 @@ import java.util.*;
 
 /**
  * Created by lx on 17-2-16.
+ * this algorithm is not used;
  */
 public class HARAlgorithm {
     public Utils utils;

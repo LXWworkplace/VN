@@ -16,6 +16,7 @@ public class Main {
         HARAlgorithm har = new HARAlgorithm(util);
         Yen_ARAlgorithm yar = new Yen_ARAlgorithm(util);
         MergeVNAlgorithm mer = new MergeVNAlgorithm(util);
-        mer.Deploy();
+        BaseAlgorithm1 ba1 = new BaseAlgorithm1(util);
+        ba1.Deploy();
     }
 }

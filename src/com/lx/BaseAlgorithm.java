@@ -20,6 +20,7 @@ public class BaseAlgorithm {
         PGFreeCapacity = new double[utils.PG.Node];
         PGFreeBandwidth = new double[utils.PG.Node][utils.PG.Node];
         VN2PN = new int[utils.VG.Node];
+        Arrays.fill(VN2PN,-1);
         VE2PE = new List[utils.VG.Edge];
         for(int i = 0; i < utils.VG.Edge; i ++){
             VE2PE[i] = new ArrayList<Integer>();

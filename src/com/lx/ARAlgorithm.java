@@ -23,6 +23,7 @@ public class ARAlgorithm {
         PGFreeCapacity = new double[utils.PG.Node];
         PGFreeBandwidth = new double[utils.PG.Node][utils.PG.Node];
         VN2PN = new int[utils.VG.Node];
+        Arrays.fill(VN2PN,-1);
         VE2PE = new List[utils.VG.Edge];
         for(int i = 0; i < utils.VG.Edge; i ++){
             VE2PE[i] = new ArrayList<Integer>();
@@ -162,10 +163,6 @@ public class ARAlgorithm {
             int des = (Integer) VE2PE[VEindex].get(i + 1);
             PGFreeBandwidth[sour][des] -= Bandwidth;
             PGFreeBandwidth[des][sour] -= Bandwidth;
-            if (PGFreeBandwidth[sour][des] < 0) {
-                Successed = false;
-                System.out.println("When Not Successed From  "+sour + "  To  " + des +"  Left BD"+ PGFreeBandwidth[sour][des]);
-            }
         }
         return Successed;
     }
