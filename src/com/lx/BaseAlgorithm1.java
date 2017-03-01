@@ -1,5 +1,7 @@
 package com.lx;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.lang.management.MonitorInfo;
 import java.util.*;
 
@@ -7,11 +9,12 @@ import java.util.*;
  * Created by lx on 17-2-22.
  * main Algorithm is based on Link-opt
  */
-public class BaseAlgorithm1 {
+public class BaseAlgorithm1 extends Algorithm{
     public Utils utils;
     public double PGFreeCapacity[];
     public double PGFreeBandwidth[][];
     public int VN2PN[];
+    public double VEBandwidth[];
     public List VE2PE[];
 
     public BaseAlgorithm1(Utils utils) {
@@ -20,6 +23,8 @@ public class BaseAlgorithm1 {
         PGFreeBandwidth = new double[utils.PG.Node][utils.PG.Node];
         VN2PN = new int[utils.VG.Node];
         Arrays.fill(VN2PN,-1);
+        VEBandwidth = new double[utils.VG.Edge];
+        Arrays.fill(VEBandwidth,0);
         VE2PE = new List[utils.VG.Edge];
         for(int i = 0; i < utils.VG.Edge; i ++){
             VE2PE[i] = new ArrayList<Integer>();
@@ -40,6 +45,7 @@ public class BaseAlgorithm1 {
                 }
             }
         }
+        int VEindex = 0;
         while(Linkqueue.isEmpty() == false){
             Link Linktmp = Linkqueue.poll();
             int i = Linktmp.From;
@@ -48,8 +54,10 @@ public class BaseAlgorithm1 {
             List path = new ArrayList<Integer>();
             if(VN2PN[i] != -1 && VN2PN[j] != -1){
                 Successed = TwoNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),path);
-                if(Successed == false)
+                if(Successed == false) {
                     System.out.println("Type 1 failed  there is not enougn BD from " + VN2PN[i] + "  to  " + VN2PN[j]);
+                    continue;
+                }
                 else{
                     for(int k = 0; k < path.size() - 1; k ++){
                         int from = (Integer)path.get(k);
@@ -57,6 +65,8 @@ public class BaseAlgorithm1 {
                         PGFreeBandwidth[from][to] -= utils.VG.EdgeCapacity[i][j];
                         PGFreeBandwidth[to][from] -= utils.VG.EdgeCapacity[i][j];
                     }
+                    VE2PE[VEindex] = new ArrayList(path);
+                    VEBandwidth[VEindex] = utils.VG.EdgeCapacity[i][j];
                     System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 1");
                 }
             }
@@ -65,8 +75,10 @@ public class BaseAlgorithm1 {
                     Successed = OneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),i,VN2PN[j],path);
                 else
                     Successed = OneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),j,VN2PN[i],path);
-                if(Successed == false)
-                    System.out.println("Type 2 failed  cant find appropriate path " +  i  +"  to  " + j);
+                if(Successed == false) {
+                    System.out.println("Type 2 failed  cant find appropriate path " + i + "  to  " + j);
+                    continue;
+                }
                 else{
                     int pnode = (Integer) path.get(path.size()-1);
                     if(VN2PN[i] == -1) {
@@ -83,6 +95,8 @@ public class BaseAlgorithm1 {
                         PGFreeBandwidth[from][to] -= utils.VG.EdgeCapacity[i][j];
                         PGFreeBandwidth[to][from] -= utils.VG.EdgeCapacity[i][j];
                     }
+                    VE2PE[VEindex] = new ArrayList(path);
+                    VEBandwidth[VEindex] = utils.VG.EdgeCapacity[i][j];
                     System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 2");
                 }
             }
@@ -92,6 +106,7 @@ public class BaseAlgorithm1 {
                 if(Successed == false){
 
                     System.out.println("Type 3 failed  cant find appropriate path " +  i  +"  to  " + j);
+                    continue;
                 }
                 else{
                     int maxid = Plink[0].From;
@@ -114,10 +129,14 @@ public class BaseAlgorithm1 {
                     PGFreeCapacity[minid] -= utils.VG.NodeCapacity[vminid];
                     PGFreeBandwidth[maxid][minid] -= utils.VG.EdgeCapacity[i][j];
                     PGFreeBandwidth[minid][maxid] -= utils.VG.EdgeCapacity[i][j];
+                    VE2PE[VEindex].add(minid);
+                    VE2PE[VEindex].add(maxid);
+                    VEBandwidth[VEindex] = utils.VG.EdgeCapacity[i][j];
                     System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 3");
                 }
 
             }
+            VEindex ++;
         }
 
     }
@@ -267,6 +286,86 @@ public class BaseAlgorithm1 {
         list.add(From);
         Collections.reverse(list);
         return true;
+    }
+
+    public void RestructVN(String path){
+        utils.setVGPath(path);
+        utils.ConstructVirtualGraph();
+        VN2PN = new int[utils.VG.Node];
+        Arrays.fill(VN2PN,-1);
+        VEBandwidth = new double[utils.VG.Edge];
+        Arrays.fill(VEBandwidth,0);
+        VE2PE = new List[utils.VG.Edge];
+        for(int i = 0; i < utils.VG.Edge; i ++){
+            VE2PE[i] = new ArrayList<Integer>();
+        }
+    }
+
+    public void AddVNlog(){
+        String path = "home/lx/VN/VNlog/"+utils.VG.Node+".brite";
+        File file = null;
+        PrintWriter out = null;
+        try{
+            file = new File(path);
+            out = new PrintWriter(file);
+            out.println("VN2PN  VN  PN  VNcapacity");
+            for(int i = 0; i < utils.VG.Node; i ++){
+                out.println(i + " " + VN2PN[i] + " " + utils.VG.NodeCapacity[i]);
+            }
+            out.println("VE2PE from to Vbandwidth");
+            for(int i = 0; i < VE2PE.length; i++){
+                for(int j = 0; j < VE2PE[i].size(); j++){
+                    out.print(VE2PE[i].get(j)+" ");
+                }
+                out.println(VEBandwidth[i]);
+            }
+        }catch (Exception e){
+            System.out.println("in addVNlog there is a exception");
+            e.printStackTrace();
+        }finally {
+            out.close();
+        }
+    }
+
+    public void KillLiveVN(String path){
+        File file;
+        Scanner scanner = null;
+        try {
+            file = new File(path);
+            scanner = new Scanner(file);
+            if(!scanner.hasNextLine()){
+                System.out.println("kill Vn read a empty log  file!");
+                return;
+            }
+            String line = scanner.nextLine();
+            String linearray[] = line.split(" +");
+            while(scanner.hasNextLine()){
+                line = scanner.nextLine();
+                linearray = line.split(" +");
+                if(linearray[0].equals("VE2PE"))
+                    break;
+                int pnode = Integer.parseInt(linearray[1]);
+                double freebandwidth = Double.parseDouble(linearray[2]);
+                PGFreeCapacity[pnode] += freebandwidth;
+            }
+            while(scanner.hasNextLine()){
+                line = scanner.nextLine();
+                linearray = line.split(" +");
+                double freebandwidth = Double.parseDouble(linearray[linearray.length-1]);
+                for(int i = 0; i < linearray.length - 1; i ++){
+                    int from = Integer.parseInt(linearray[i]);
+                    int to = Integer.parseInt(linearray[i + 1]);
+                    PGFreeBandwidth[from][to] += freebandwidth;
+                    PGFreeBandwidth[to][from] += freebandwidth;
+                }
+            }
+
+        }catch (Exception e){
+            System.out.println("int kill live Vn, there is a exception");
+            e.printStackTrace();
+        }finally {
+            scanner.close();
+        }
     }
 
     public static void main(String[] args){
