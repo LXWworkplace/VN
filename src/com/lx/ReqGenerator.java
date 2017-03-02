@@ -41,6 +41,8 @@ public class ReqGenerator {
         List AddedVN = new ArrayList<Integer>();
         // avoid maped same VN two times;
         List mappedVN = new ArrayList<Integer>();
+        // Lived VN now
+        List liveVN = new ArrayList<Integer>();
         Random random = new Random();
         int first = random.nextInt(9) + 1;
         boolean second = random.nextBoolean();
@@ -49,6 +51,7 @@ public class ReqGenerator {
             VNsize = first * Ratio + 5 * Ratio / 10;
         AddedVN.add(VNsize);
         mappedVN.add(VNsize);
+        liveVN.add(VNsize);
         out.println("add " + VNsize + ".brite");
         maxVnet --;
         while(maxVnet > 0){
@@ -66,6 +69,7 @@ public class ReqGenerator {
                 }while(mappedVN.contains(VNsize) == true);
                 AddedVN.add(VNsize);
                 mappedVN.add(VNsize);
+                liveVN.add(VNsize);
                 out.println("add " + VNsize + ".brite");
                 maxVnet --;
             }
@@ -78,8 +82,13 @@ public class ReqGenerator {
                 VNsize = (Integer) AddedVN.get(killedindex);
                 AddedVN.remove(killedindex);
                 out.println("kill " + VNsize + ".brite");
+                liveVN.remove((Object)VNsize);
             }
 
+        }
+        while(!liveVN.isEmpty()){
+            VNsize = (Integer) liveVN.remove(0);
+            out.println("kill " + VNsize + ".brite");
         }
         out.close();
 

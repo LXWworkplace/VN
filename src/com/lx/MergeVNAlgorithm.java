@@ -1,6 +1,7 @@
 package com.lx;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -268,11 +269,18 @@ public class MergeVNAlgorithm extends Algorithm{
     }
 
     public void AddVNlog(){
-        String path = "home/lx/VN/VNlog/"+utils.VG.Node+".brite";
-        File file = null;
+        String path = "/home/lx/VN/VNlog/"+utils.VG.Node+".brite";
+        File file;
         PrintWriter out = null;
         try{
             file = new File(path);
+            if(!file.exists()){
+                try {
+                    file.createNewFile();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
             out = new PrintWriter(file);
             out.println("VN2PN  VN  PN  VNcapacity");
             for(int i = 0; i < utils.VG.Node; i ++){

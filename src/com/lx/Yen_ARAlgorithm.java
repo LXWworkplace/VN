@@ -1,6 +1,7 @@
 package com.lx;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -17,7 +18,8 @@ public class Yen_ARAlgorithm extends Algorithm{
     // Dijkstra get shortest path to To
     public int Dist[];
     public final int  infi = 9999;
-    public final int Yen_K = 5;
+    public final int Yen_K = 10;
+    public int count = 0;
 
     public Yen_ARAlgorithm(Utils a_utils) {
         this.utils = a_utils;
@@ -44,10 +46,10 @@ public class Yen_ARAlgorithm extends Algorithm{
         List<Pair> PGLeftCap = new ArrayList<>();
         for(int i = 0; i < utils.PG.Node; i ++){
             double TotalBandwidth = 0;
-            double TotalCapacity = utils.PG.NodeCapacity[i];
+            double TotalCapacity = PGFreeCapacity[i];
             for(int j = 0; j < utils.PG.Node; j ++){
-                if(utils.PG.EdgeCapacity[i][j] > 0)
-                    TotalBandwidth += utils.PG.EdgeCapacity[i][j];
+                if(PGFreeBandwidth[i][j] > 0)
+                    TotalBandwidth += PGFreeBandwidth[i][j];
             }
             double AvailableResources = TotalBandwidth * TotalCapacity;
             PGLeftCap.add(new Pair(AvailableResources,i));
@@ -234,6 +236,7 @@ public class Yen_ARAlgorithm extends Algorithm{
                 Store temp = B.poll();
                 if(CheckPathBD(temp.Path,bandwidth) == true){
                     Path.addAll(temp.Path);
+                    //Path = new ArrayList(temp.Path);
                     return true;
                 }
                 else
@@ -253,12 +256,18 @@ public class Yen_ARAlgorithm extends Algorithm{
             if(path.size() != pathofb.size())
                 continue;
             else{
+                boolean flag = false;
                 for(int i = 0; i < path.size(); i ++){
-                    if(path.get(i) != pathofb.get(i))
+                    if((Integer)(path.get(i)) != (Integer) (pathofb.get(i))){
+                        flag = true;
                         break;
+                    }
+
                 }
-                Successed = true;
-                break;
+                if(flag == false) {
+                    Successed = true;
+                    break;
+                }
             }
         }
         return Successed;
@@ -324,18 +333,31 @@ public class Yen_ARAlgorithm extends Algorithm{
     }
 
     public void AddVNlog(){
-        String path = "home/lx/VN/VNlog/"+utils.VG.Node+".brite";
-        File file = null;
+        String path = "/home/lx/VN/VNlog/"+utils.VG.Node+".brite";
+        File file;
         PrintWriter out = null;
         try{
             file = new File(path);
+            if(!file.exists()){
+                try {
+                    file.createNewFile();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
             out = new PrintWriter(file);
             out.println("VN2PN  VN  PN  VNcapacity");
             for(int i = 0; i < utils.VG.Node; i ++){
+                // VN i didn't map
+                if(VN2PN[i] == -1)
+                    continue;
                 out.println(i + " " + VN2PN[i] + " " + utils.VG.NodeCapacity[i]);
             }
             out.println("VE2PE from to Vbandwidth");
             for(int i = 0; i < VE2PE.length; i++){
+                // VEdge i didn't map or VEdge in a PNode
+                if(VE2PE[i].size() == 0)
+                    continue;
                 for(int j = 0; j < VE2PE[i].size(); j++){
                     out.print(VE2PE[i].get(j)+" ");
                 }
@@ -350,6 +372,7 @@ public class Yen_ARAlgorithm extends Algorithm{
     }
 
     public void KillLiveVN(String path){
+        count ++;
         File file;
         Scanner scanner = null;
         try {
@@ -374,7 +397,7 @@ public class Yen_ARAlgorithm extends Algorithm{
                 line = scanner.nextLine();
                 linearray = line.split(" +");
                 double freebandwidth = Double.parseDouble(linearray[linearray.length-1]);
-                for(int i = 0; i < linearray.length - 1; i ++){
+                for(int i = 0; i < linearray.length - 2; i ++){
                     int from = Integer.parseInt(linearray[i]);
                     int to = Integer.parseInt(linearray[i + 1]);
                     PGFreeBandwidth[from][to] += freebandwidth;
@@ -387,6 +410,17 @@ public class Yen_ARAlgorithm extends Algorithm{
             e.printStackTrace();
         }finally {
             scanner.close();
+        }
+        if(count == 4){
+            for(int i = 0 ; i < utils.PG.Node; i ++){
+                System.out.println("  "+(utils.PG.NodeCapacity[i] - PGFreeCapacity[i]));
+            }
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1  ");
+            for(int i = 0 ; i < utils.PG.Node; i ++){
+                for (int j = 0; j < utils.PG.Node; j ++)
+                    if(utils.PG.EdgeCapacity[i][j] > 0)
+                    System.out.println("  "+(utils.PG.EdgeCapacity[i][j] - PGFreeBandwidth[i][j]));
+            }
         }
     }
 

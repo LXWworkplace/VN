@@ -4,6 +4,7 @@ import com.lx.Pair;
 import com.lx.Utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -42,10 +43,10 @@ public class ARAlgorithm extends Algorithm{
         List<Pair> PGLeftCap = new ArrayList<>();
         for(int i = 0; i < utils.PG.Node; i ++){
             double TotalBandwidth = 0;
-            double TotalCapacity = utils.PG.NodeCapacity[i];
+            double TotalCapacity = PGFreeCapacity[i];
             for(int j = 0; j < utils.PG.Node; j ++){
-                if(utils.PG.EdgeCapacity[i][j] > 0)
-                    TotalBandwidth += utils.PG.EdgeCapacity[i][j];
+                if(PGFreeBandwidth[i][j] > 0)
+                    TotalBandwidth += PGFreeBandwidth[i][j];
             }
             double AvailableResources = TotalBandwidth * TotalCapacity;
             PGLeftCap.add(new Pair(AvailableResources,i));
@@ -184,18 +185,31 @@ public class ARAlgorithm extends Algorithm{
     }
 
     public void AddVNlog(){
-        String path = "home/lx/VN/VNlog/"+utils.VG.Node+".brite";
-        File file = null;
+        String path = "/home/lx/VN/VNlog/"+utils.VG.Node+".brite";
+        File file;
         PrintWriter out = null;
         try{
             file = new File(path);
+            if(!file.exists()){
+                try {
+                    file.createNewFile();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
             out = new PrintWriter(file);
             out.println("VN2PN  VN  PN  VNcapacity");
             for(int i = 0; i < utils.VG.Node; i ++){
+                // VN i didn't map
+                if(VN2PN[i] == -1)
+                    continue;
                 out.println(i + " " + VN2PN[i] + " " + utils.VG.NodeCapacity[i]);
             }
             out.println("VE2PE from to Vbandwidth");
             for(int i = 0; i < VE2PE.length; i++){
+                // VEdge i didn't map
+                if(VE2PE[i].size() == 0)
+                    continue;
                 for(int j = 0; j < VE2PE[i].size(); j++){
                     out.print(VE2PE[i].get(j)+" ");
                 }
@@ -234,7 +248,7 @@ public class ARAlgorithm extends Algorithm{
                 line = scanner.nextLine();
                 linearray = line.split(" +");
                 double freebandwidth = Double.parseDouble(linearray[linearray.length-1]);
-                for(int i = 0; i < linearray.length - 1; i ++){
+                for(int i = 0; i < linearray.length - 2; i ++){
                     int from = Integer.parseInt(linearray[i]);
                     int to = Integer.parseInt(linearray[i + 1]);
                     PGFreeBandwidth[from][to] += freebandwidth;

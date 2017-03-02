@@ -29,6 +29,8 @@ public class Controller {
         String[] linearray = line.split(" ");
         utils.setPGPath((RG.PGfolderpath+"/" + RG.PGfile));
         utils.setVGPath((RG.VGfolderpath+"/" + linearray[1]));
+        utils.ConstructVirtualGraph();
+        utils.ConstructPhysicalGraph();
         switch (op){
             case 1:
                 algorithm = new BaseAlgorithm(utils);
@@ -58,10 +60,26 @@ public class Controller {
             }
             // kill VN
             else{
-                String logpath = "home/lx/VN/VNlog/" + linearray[1];
+                String logpath = "/home/lx/VN/VNlog/" + linearray[1];
                 algorithm.KillLiveVN(logpath);
             }
         }
 
+    }
+
+    public static void main(String[] args){
+        ReqGenerator RG = new ReqGenerator(2,4,2,"200.brite","/home/lx/Brite/PNet","/home/lx/Brite/VNet","/home/lx/VN/RGoutput/RGresult.txt");
+        try {
+            RG.Generate();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        Controller controller = new Controller(RG);
+        try {
+            controller.Mapping(3);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        int a = 0;
     }
 }
