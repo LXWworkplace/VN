@@ -284,10 +284,16 @@ public class MergeVNAlgorithm extends Algorithm{
             out = new PrintWriter(file);
             out.println("VN2PN  VN  PN  VNcapacity");
             for(int i = 0; i < utils.VG.Node; i ++){
+                // VN i didn't map
+                if(VN2PN[i] == -1)
+                    continue;
                 out.println(i + " " + VN2PN[i] + " " + utils.VG.NodeCapacity[i]);
             }
             out.println("VE2PE from to Vbandwidth");
             for(int i = 0; i < VE2PE.length; i++){
+                // VEdge i didn't map
+                if(VE2PE[i].size() == 0)
+                    continue;
                 for(int j = 0; j < VE2PE[i].size(); j++){
                     out.print(VE2PE[i].get(j)+" ");
                 }
@@ -326,7 +332,7 @@ public class MergeVNAlgorithm extends Algorithm{
                 line = scanner.nextLine();
                 linearray = line.split(" +");
                 double freebandwidth = Double.parseDouble(linearray[linearray.length-1]);
-                for(int i = 0; i < linearray.length - 1; i ++){
+                for(int i = 0; i < linearray.length - 2; i ++){
                     int from = Integer.parseInt(linearray[i]);
                     int to = Integer.parseInt(linearray[i + 1]);
                     PGFreeBandwidth[from][to] += freebandwidth;

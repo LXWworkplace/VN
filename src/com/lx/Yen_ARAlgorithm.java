@@ -196,6 +196,8 @@ public class Yen_ARAlgorithm extends Algorithm{
                         int from = spur_node;
                         int to = (Integer)(temp_path.get(i+1));
                         remove_edges.add(new Edge(from,to,PGFreeBandwidth[from][to]));
+                        if(PGFreeBandwidth[from][to] == -1)
+                            System.out.println("??????????????????????????????????????????????????");
                         PGFreeBandwidth[from][to] = -1;
                         PGFreeBandwidth[to][from] = -1;
                     }
@@ -221,8 +223,10 @@ public class Yen_ARAlgorithm extends Algorithm{
                     for(int j = 1; j < spur2tar_path.size(); j ++)
                         Total_dist[(Integer)spur2tar_path.get(j)] = root_distance + spur2tar_dist[(Integer)spur2tar_path.get(j)];
 
-                    if(CheckPathInB(Total_path,B) == false)
-                        B.offer(new Store(Total_path,Total_dist,des));
+                    if(CheckPathBD(Total_path,bandwidth) && !CheckPathInB(Total_path,B)) {
+
+                        B.offer(new Store(Total_path, Total_dist, des));
+                    }
                 }
                 for(int j = 0; j < remove_edges.size(); j ++){
                     Edge temp = (Edge)remove_edges.get(j);
@@ -234,9 +238,10 @@ public class Yen_ARAlgorithm extends Algorithm{
                 return false;
             else{
                 Store temp = B.poll();
-                if(CheckPathBD(temp.Path,bandwidth) == true){
-                    Path.addAll(temp.Path);
-                    //Path = new ArrayList(temp.Path);
+                if(CheckPathBD(temp.Path,bandwidth)){
+                    //Path.addAll(temp.Path);
+                    for(int j = 0; j < temp.Path.size(); j++)
+                        Path.add((temp.Path.get(j)));
                     return true;
                 }
                 else
@@ -307,6 +312,8 @@ public class Yen_ARAlgorithm extends Algorithm{
         if(YenKsp(From,To,Yen_K,Path,Bandwidth) == false)
             Successed = false;
         else{
+            if(Path.isEmpty() || !CheckPathBD(Path,Bandwidth))
+                return false;
             for(int i = 0 ; i < Path.size() - 1; i ++){
                 int sour = (Integer) Path.get(i);
                 int des = (Integer) Path.get(i + 1);
@@ -411,15 +418,15 @@ public class Yen_ARAlgorithm extends Algorithm{
         }finally {
             scanner.close();
         }
-        if(count == 4){
+        if(count == 10 ){
             for(int i = 0 ; i < utils.PG.Node; i ++){
                 System.out.println("  "+(utils.PG.NodeCapacity[i] - PGFreeCapacity[i]));
             }
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1  ");
             for(int i = 0 ; i < utils.PG.Node; i ++){
-                for (int j = 0; j < utils.PG.Node; j ++)
+                for (int j = i; j < utils.PG.Node; j ++)
                     if(utils.PG.EdgeCapacity[i][j] > 0)
-                    System.out.println("  "+(utils.PG.EdgeCapacity[i][j] - PGFreeBandwidth[i][j]));
+                    System.out.println( i + "  " + j + "  "+(utils.PG.EdgeCapacity[i][j] - PGFreeBandwidth[i][j]));
             }
         }
     }
@@ -427,7 +434,7 @@ public class Yen_ARAlgorithm extends Algorithm{
     public Comparator<Store> comparator = new Comparator<Store>() {
         @Override
         public int compare(Store o1, Store o2) {
-            return o1.Dist[o1.Des] - o1.Dist[o1.Des];
+            return o1.Dist[o1.Des] - o2.Dist[o2.Des];
         }
     };
 

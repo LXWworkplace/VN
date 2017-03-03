@@ -68,7 +68,7 @@ public class Controller {
     }
 
     public static void main(String[] args){
-        ReqGenerator RG = new ReqGenerator(2,4,2,"200.brite","/home/lx/Brite/PNet","/home/lx/Brite/VNet","/home/lx/VN/RGoutput/RGresult.txt");
+        ReqGenerator RG = new ReqGenerator(2,10,2,"200.brite","/home/lx/Brite/PNet","/home/lx/Brite/VNet","/home/lx/VN/RGoutput/RGresult.txt");
         try {
             RG.Generate();
         } catch (FileNotFoundException e) {
@@ -76,7 +76,7 @@ public class Controller {
         }
         Controller controller = new Controller(RG);
         try {
-            controller.Mapping(3);
+            controller.Mapping(5);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
