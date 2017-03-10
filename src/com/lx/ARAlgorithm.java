@@ -2,6 +2,7 @@ package com.lx;
 
 import com.lx.Pair;
 import com.lx.Utils;
+import org.omg.PortableServer.LIFESPAN_POLICY_ID;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +19,7 @@ public class ARAlgorithm extends Algorithm{
     public int VN2PN[];
     public double VEBandwidth[];
     public List VE2PE[];
+    public final double LimitRatio = 0.1;
 
     public ARAlgorithm(Utils a_utils) {
         this.utils = a_utils;
@@ -75,7 +77,7 @@ public class ARAlgorithm extends Algorithm{
             int PNode = PGLeftCap.get(Indexofhost).Id;
             double PCapacity = PGFreeCapacity[PNode];
 
-            while(PCapacity - VCapacity < 0) {
+            while(!CheckPNodeAR(PNode) || PCapacity - VCapacity < 0) {
                 Indexofhost++;
                 PNode = PGLeftCap.get(Indexofhost).Id;
                 PCapacity = PGFreeCapacity[PNode];
@@ -168,6 +170,24 @@ public class ARAlgorithm extends Algorithm{
             PGFreeBandwidth[sour][des] -= Bandwidth;
             PGFreeBandwidth[des][sour] -= Bandwidth;
         }
+        return Successed;
+    }
+
+    // judge if a Pnode freeresource is satisfied
+    public boolean CheckPNodeAR(int PNode){
+        boolean Successed = true;
+        double FreeBD = 0;
+        double BD = 0;
+        if(PGFreeCapacity[PNode]/utils.PG.NodeCapacity[PNode] < LimitRatio)
+            return false;
+        for(int i = 0; i < utils.PG.Node; i ++){
+            if(utils.PG.EdgeCapacity[PNode][i] > 0){
+                BD += utils.PG.EdgeCapacity[PNode][i];
+                FreeBD += PGFreeBandwidth[PNode][i];
+            }
+        }
+        if(FreeBD/BD < LimitRatio)
+            Successed = false;
         return Successed;
     }
 

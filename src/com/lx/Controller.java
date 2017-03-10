@@ -69,14 +69,17 @@ public class Controller {
 
     public static void main(String[] args){
         ReqGenerator RG = new ReqGenerator(2,10,2,"200.brite","/home/lx/Brite/PNet","/home/lx/Brite/VNet","/home/lx/VN/RGoutput/RGresult.txt");
+        /*
         try {
             RG.Generate();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        */
+        RG.NewGenerate();
         Controller controller = new Controller(RG);
         try {
-            controller.Mapping(5);
+            controller.Mapping(2);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

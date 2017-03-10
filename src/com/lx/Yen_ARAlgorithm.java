@@ -114,7 +114,7 @@ public class Yen_ARAlgorithm extends Algorithm{
         for(int i = 0; i < utils.PG.Node; i++){
             if (i == source)
                 continue;
-            if(PGFreeBandwidth[source][i] > 0)
+            if(!Selected[i] && PGFreeBandwidth[source][i] > 0)
                 Dist[i] = 1;
             else
                 Dist[i] = infi;
@@ -126,7 +126,7 @@ public class Yen_ARAlgorithm extends Algorithm{
                 break;
             }
             for(int j = 0; j < utils.PG.Node; j ++){
-                if(Selected[j] == false && Dist[j] < mindistance){
+                if(!Selected[j] && Dist[j] < mindistance){
                     minnode = j;
                     mindistance = Dist[j];
                 }
@@ -135,7 +135,7 @@ public class Yen_ARAlgorithm extends Algorithm{
                 break;
             Selected[minnode] = true;
             for(int j = 0; j < utils.PG.Node; j ++){
-                if(Selected[j] == false && PGFreeBandwidth[minnode][j] >= 0){
+                if(!Selected[j]  && PGFreeBandwidth[minnode][j] >= 0){
                     if(Dist[minnode] + 1 < Dist[j]) {
                         Dist[j] = Dist[minnode] + 1;
                         Prev[j] = minnode;
@@ -196,8 +196,11 @@ public class Yen_ARAlgorithm extends Algorithm{
                         int from = spur_node;
                         int to = (Integer)(temp_path.get(i+1));
                         remove_edges.add(new Edge(from,to,PGFreeBandwidth[from][to]));
+
+                        // for debug!
                         if(PGFreeBandwidth[from][to] == -1)
                             System.out.println("??????????????????????????????????????????????????");
+                        // for debug!
                         PGFreeBandwidth[from][to] = -1;
                         PGFreeBandwidth[to][from] = -1;
                     }

@@ -103,9 +103,59 @@ public class BaseAlgorithm1 extends Algorithm{
             }
             else{
                 Link Plink[] = new Link[1];
+                Plink[0] = new Link(-1,-1,-1);
                 Successed = NoneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),Plink);
                 if(Successed == false){
+                    // judge if the Pnode Freecapacity is not enough
+                    if(Plink[0].From == -1 && Plink[0].To == -1 && Plink[0].Bandwidth == -1){
+                        // ReMap VNode i
+                        Queue<Pair> queue1 = new PriorityQueue<>(Pair.comparator);
+                        for(int k = 0; k < utils.PG.Node; k ++){
+                            if(PGFreeCapacity[k] >= utils.VG.NodeCapacity[i])
+                                queue1.offer(new Pair(ComputeAllFreeBD(k),k));
+                        }
+                        if(queue1.isEmpty()){
+                            System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
+                            continue;
+                        }
+                        Pair pair = queue1.poll();
+                        VN2PN[i] = pair.Id;
+                        PGFreeCapacity[pair.Id] -= utils.VG.NodeCapacity[i];
 
+                        // ReMap VNode j
+                        Queue<Pair> queue2 = new PriorityQueue<>(Pair.comparator);
+                        for(int k = 0; k < utils.PG.Node; k ++){
+                            if(PGFreeCapacity[k] >= utils.VG.NodeCapacity[j])
+                                queue2.offer(new Pair(ComputeAllFreeBD(k),k));
+                        }
+                        if(queue2.isEmpty()){
+                            System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
+                            continue;
+                        }
+                        Pair pair1 = queue2.poll();
+                        VN2PN[j] = pair1.Id;
+                        PGFreeCapacity[pair1.Id] = utils.VG.NodeCapacity[j];
+
+                        //  ReMap Link i->j
+                        Link newlink = new Link(i,j,utils.VG.EdgeCapacity[i][j]);
+                        List<Integer> remaplist = new ArrayList<>();
+                        boolean res = TwoNodeDeployed(newlink,remaplist);
+                        if (!res){
+                            System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
+                            continue;
+                        }
+                        else{
+                            for(int k = 0; k < remaplist.size() - 1; k ++){
+                                int from = remaplist.get(k);
+                                int to = remaplist.get(k+1);
+                                PGFreeBandwidth[from][to] -= utils.VG.EdgeCapacity[i][j];
+                                PGFreeBandwidth[to][from] -= utils.VG.EdgeCapacity[i][j];
+                            }
+                            VE2PE[VEindex] = new ArrayList(remaplist);
+                            VEBandwidth[VEindex] = utils.VG.EdgeCapacity[i][j];
+                            System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 3  fail-tactics");
+                        }
+                    }
                     System.out.println("Type 3 failed  cant find appropriate path " +  i  +"  to  " + j);
                     continue;
                 }
@@ -289,6 +339,16 @@ public class BaseAlgorithm1 extends Algorithm{
         list.add(From);
         Collections.reverse(list);
         return true;
+    }
+
+    //Compute a Pnode，s all free bd
+    public double ComputeAllFreeBD(int PNode){
+        double res = 0;
+        for(int i = 0; i < utils.PG.Node; i ++){
+            if (PGFreeBandwidth[PNode][i] > 0)
+                res += PGFreeBandwidth[PNode][i];
+        }
+        return res;
     }
 
     public void RestructVN(String path){
