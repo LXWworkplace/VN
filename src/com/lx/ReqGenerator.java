@@ -31,11 +31,17 @@ public class ReqGenerator {
         OutputRGresult = outputRGresult;
     }
 
-    public void Generate() throws FileNotFoundException {
+    public void Generate(){
         int Ratio = (int) Math.pow(10,Case);
         int maxVnet = MaxVnetNum;
         File file = new File(OutputRGresult);
-        PrintWriter out = new PrintWriter(file);
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(file);
+        } catch (FileNotFoundException e) {
+            System.out.println("Generate exception !!");
+            e.printStackTrace();
+        }
 
         // already maped VN
         List AddedVN = new ArrayList<Integer>();

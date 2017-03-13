@@ -1,7 +1,6 @@
 package com.lx;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Scanner;
 
 /**
@@ -9,12 +8,15 @@ import java.util.Scanner;
  */
 public class Controller {
     public ReqGenerator RG;
+    public String ResultParent = "/home/lx/VN/Result/";
 
     public Controller(ReqGenerator RG) {
         this.RG = RG;
     }
 
-    public void Mapping(int op) throws FileNotFoundException {
+    public double Mapping(int op, String Resutlt) throws FileNotFoundException {
+        String ResultPath = Resutlt;
+        double revenue = 0;
         Algorithm algorithm;
         Utils utils = new Utils();
         File file = new File(RG.OutputRGresult);
@@ -24,7 +26,7 @@ public class Controller {
             line = scanner.nextLine();
         else {
             System.out.println("when read from outputRGresult, it is null");
-            return;
+            return -1;
         }
         String[] linearray = line.split(" ");
         utils.setPGPath((RG.PGfolderpath+"/" + RG.PGfile));
@@ -48,7 +50,7 @@ public class Controller {
                 algorithm = new MergeVNAlgorithm(utils);
         }
         algorithm.Deploy();
-        algorithm.AddVNlog();
+        revenue += algorithm.AddVNlog();
         while(scanner.hasNextLine()){
             line = scanner.nextLine();
             linearray = line.split(" ");
@@ -64,25 +66,65 @@ public class Controller {
                 algorithm.KillLiveVN(logpath);
             }
         }
-
+        return revenue;
     }
 
     public static void main(String[] args){
-        ReqGenerator RG = new ReqGenerator(2,10,2,"200.brite","/home/lx/Brite/PNet","/home/lx/Brite/VNet","/home/lx/VN/RGoutput/RGresult.txt");
-        /*
-        try {
-            RG.Generate();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        */
-        RG.NewGenerate();
+        int aCase = 2;
+        int maxVnetNum = 10;
+        int LimitVnet = 2;
+        String PGfile = "200.brite";
+        String PGfolderpath = "/home/lx/Brite/PNet";
+        String VGfolderpath = "/home/lx/Brite/VNet";
+        String outputRGresult = "/home/lx/VN/RGoutput/RGresult.txt";
+        double revenue = 0;
+        ReqGenerator RG = new ReqGenerator(aCase,maxVnetNum,LimitVnet,PGfile,PGfolderpath,VGfolderpath,outputRGresult);
+        //RG.NewGenerate();
+        RG.Generate();
         Controller controller = new Controller(RG);
-        try {
-            controller.Mapping(2);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+
+        int loop = 5;
+        for(int i = 1; i <= loop; i ++){
+            String ResultFile;
+            PrintWriter out = null;
+
+            long StartTime = System.nanoTime();
+            ResultFile = controller.ResultParent + "ResultWithOp"+ i +".txt";
+            FileWriter file = null;
+            try {
+                file = new FileWriter(ResultFile,true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            // Execute
+            try {
+                revenue = controller.Mapping(i,ResultFile);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            long EndTime = System.nanoTime();
+            double ExecuteTime = (EndTime - StartTime) / Math.pow(10,9);
+
+            // ADD ExecuteTime, revenue to result
+            try {
+                out = new PrintWriter(file);
+                out.println("Execute with case "+ aCase + " With Op  "+ i + " ExecuteTime "+ ExecuteTime);
+                out.println("In this loop the revenue is   " +(revenue / ExecuteTime));
+            }catch (Exception e){
+                System.out.println("Add ExecutionTime occur a Exception");
+                e.printStackTrace();
+            }finally {
+                out.close();
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    System.out.println("close file error in ADD ExecuteTime, revenue to result");
+                    e.printStackTrace();
+                }
+            }
         }
-        int a = 0;
+
+
     }
 }

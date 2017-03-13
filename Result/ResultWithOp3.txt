@@ -1,0 +1,20 @@
+Execute with case 2 With Op  3 ExecuteTime 0.833189529
+In this loop the revenue is   1698.8114103820772
+Execute with case 2 With Op  3 ExecuteTime 0.791159503
+In this loop the revenue is   1307.1419472974435
+Execute with case 2 With Op  3 ExecuteTime 0.92232734
+In this loop the revenue is   194.0586116816886
+Execute with case 2 With Op  3 ExecuteTime 0.861878536
+In this loop the revenue is   1635.5046237764689
+Execute with case 2 With Op  3 ExecuteTime 0.68976333
+In this loop the revenue is   864.7653808894178
+Execute with case 2 With Op  3 ExecuteTime 0.982082028
+In this loop the revenue is   1289.6481870522186
+Execute with case 2 With Op  3 ExecuteTime 0.722097597
+In this loop the revenue is   2336.6395529965653
+Execute with case 2 With Op  3 ExecuteTime 0.7173873
+In this loop the revenue is   1062.7949865786463
+Execute with case 2 With Op  3 ExecuteTime 0.75749999
+In this loop the revenue is   1285.1119932456027
+Execute with case 2 With Op  3 ExecuteTime 0.719518031
+In this loop the revenue is   1298.257706230477

@@ -16,10 +16,10 @@ public class Utils {
     public String PGPath;
     public String VGPath;
 
-    public double PGBandwidthMean = 10;
+    public double PGBandwidthMean = 20;
     public double PGBandwidthSquare = 4;
 
-    public double PGCapacityMean = 1.2;
+    public double PGCapacityMean = 4;
     public double PGCapacitySquare = 0.01;
 
     public double VGCapacityMean = 0.1;

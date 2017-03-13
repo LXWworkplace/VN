@@ -16,6 +16,7 @@ public class MergeVNAlgorithm extends Algorithm{
     public int VN2PN[];
     public double VEBandwidth[];
     public List VE2PE[];
+    public int kill = 0;
 
     public MergeVNAlgorithm(Utils utils) {
         this.utils = utils;
@@ -268,7 +269,10 @@ public class MergeVNAlgorithm extends Algorithm{
         }
     }
 
-    public void AddVNlog(){
+    public double AddVNlog(){
+        double RevenueRatio = utils.VGBandwidthMean / utils.VGCapacityMean;
+        double Capacityrevenue = 0;
+        double Bandwidthrevenue = 0;
         String path = "/home/lx/VN/VNlog/"+utils.VG.Node+".brite";
         File file;
         PrintWriter out = null;
@@ -287,6 +291,7 @@ public class MergeVNAlgorithm extends Algorithm{
                 // VN i didn't map
                 if(VN2PN[i] == -1)
                     continue;
+                Capacityrevenue += utils.VG.NodeCapacity[i];
                 out.println(i + " " + VN2PN[i] + " " + utils.VG.NodeCapacity[i]);
             }
             out.println("VE2PE from to Vbandwidth");
@@ -297,6 +302,7 @@ public class MergeVNAlgorithm extends Algorithm{
                 for(int j = 0; j < VE2PE[i].size(); j++){
                     out.print(VE2PE[i].get(j)+" ");
                 }
+                Bandwidthrevenue += VEBandwidth[i] / VE2PE[i].size();
                 out.println(VEBandwidth[i]);
             }
         }catch (Exception e){
@@ -305,6 +311,8 @@ public class MergeVNAlgorithm extends Algorithm{
         }finally {
             out.close();
         }
+        Bandwidthrevenue += RevenueHideinPnode();
+        return Capacityrevenue * RevenueRatio + Bandwidthrevenue;
     }
 
     public void KillLiveVN(String path){
@@ -346,6 +354,30 @@ public class MergeVNAlgorithm extends Algorithm{
         }finally {
             scanner.close();
         }
+        /*
+        kill++;
+        if(kill == 10){
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            for(int i = 0; i < utils.PG.Node; i ++){
+                for(int j = 0; j < utils.PG.Node; j ++){
+                    if (utils.PG.EdgeCapacity[i][j] > 0)
+                        System.out.println("" + utils.PG.EdgeCapacity[i][j]+ "    " + (utils.PG.EdgeCapacity[i][j]- PGFreeBandwidth[i][j]));
+                }
+            }
+        }
+        */
+    }
+
+    // add  bandwidth revenue from same node
+    public double RevenueHideinPnode(){
+        double HidenRevenue = 0;
+        for(int i = 0; i < utils.VG.Node; i ++){
+            for(int j = i+1; j < utils.VG.Node; j ++){
+                if(utils.VG.EdgeCapacity[i][j] > 0 && VN2PN[i] == VN2PN[j])
+                    HidenRevenue += utils.VG.EdgeCapacity[i][j] * 2;
+            }
+        }
+        return HidenRevenue;
     }
 
     public static void main(String[] args){

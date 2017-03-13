@@ -364,7 +364,10 @@ public class BaseAlgorithm1 extends Algorithm{
         }
     }
 
-    public void AddVNlog(){
+    public double AddVNlog(){
+        double RevenueRatio = utils.VGBandwidthMean / utils.VGCapacityMean;
+        double Capacityrevenue = 0;
+        double Bandwidthrevenue = 0;
         String path = "/home/lx/VN/VNlog/"+utils.VG.Node+".brite";
         File file;
         PrintWriter out = null;
@@ -383,6 +386,7 @@ public class BaseAlgorithm1 extends Algorithm{
                 // VN i didn't map
                 if(VN2PN[i] == -1)
                     continue;
+                Capacityrevenue += utils.VG.NodeCapacity[i];
                 out.println(i + " " + VN2PN[i] + " " + utils.VG.NodeCapacity[i]);
             }
             out.println("VE2PE from to Vbandwidth");
@@ -393,6 +397,7 @@ public class BaseAlgorithm1 extends Algorithm{
                 for(int j = 0; j < VE2PE[i].size(); j++){
                     out.print(VE2PE[i].get(j)+" ");
                 }
+                Bandwidthrevenue += VEBandwidth[i] / VE2PE[i].size();
                 out.println(VEBandwidth[i]);
             }
         }catch (Exception e){
@@ -401,6 +406,8 @@ public class BaseAlgorithm1 extends Algorithm{
         }finally {
             out.close();
         }
+        Bandwidthrevenue += RevenueHideinPnode();
+        return Capacityrevenue * RevenueRatio + Bandwidthrevenue;
     }
 
     public void KillLiveVN(String path){
@@ -442,6 +449,17 @@ public class BaseAlgorithm1 extends Algorithm{
         }finally {
             scanner.close();
         }
+    }
+    // add  bandwidth revenue from same node
+    public double RevenueHideinPnode(){
+        double HidenRevenue = 0;
+        for(int i = 0; i < utils.VG.Node; i ++){
+            for(int j = i+1; j < utils.VG.Node; j ++){
+                if(utils.VG.EdgeCapacity[i][j] > 0 && VN2PN[i] == VN2PN[j])
+                    HidenRevenue += utils.VG.EdgeCapacity[i][j] * 2;
+            }
+        }
+        return HidenRevenue;
     }
 
     public static void main(String[] args){
