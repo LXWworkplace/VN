@@ -5,6 +5,7 @@ import com.lx.Utils;
 import org.omg.PortableServer.LIFESPAN_POLICY_ID;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -41,7 +42,7 @@ public class ARAlgorithm extends Algorithm{
         }
     }
 
-    public void Deploy(){
+    public void Deploy(String log){
         // sort PG Available Resources, with two parameter(cap, id)
         List<Pair> PGLeftCap = new ArrayList<>();
         for(int i = 0; i < utils.PG.Node; i ++){
@@ -94,12 +95,37 @@ public class ARAlgorithm extends Algorithm{
                 if (utils.VG.EdgeCapacity[i][j] > 0){
                     boolean res = DeployVPath(VN2PN[i], VN2PN[j],utils.VG.EdgeCapacity[i][j],VEindex);
                     if (res == false){
+                        BDfailcost += utils.VG.EdgeCapacity[i][j];
                         System.out.println("Deploy Virtual Edge " + i + " " + j + "Not Successed!");
                     }
-                    else
+                    else {
+                        BDcost += utils.VG.EdgeCapacity[i][j] * VE2PE[VEindex].size();
                         System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!!");
+                    }
                     VEindex ++;
                 }
+            }
+        }
+
+        // log the cost of deploy
+        int Pnodeused = PNodeUsed();
+        String ResultFile = log;
+        PrintWriter out = null;
+
+        FileWriter file = null;
+        try {
+            file = new FileWriter(ResultFile,true);
+            out = new PrintWriter(file);
+            out.print("" + Pnodeused + "    ");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            out.close();
+            try {
+                file.close();
+            } catch (IOException e) {
+                System.out.println("close file error in ADD Pnode cost to result");
+                e.printStackTrace();
             }
         }
     }
@@ -165,15 +191,15 @@ public class ARAlgorithm extends Algorithm{
             VE2PE[VEindex].add(pathnode.get(pathnode.size()-i-1));
         }
         VE2PE[VEindex].add(To);
+        if (!CheckPathBD(VE2PE[VEindex],Bandwidth)) {
+            VE2PE[VEindex].clear();
+            return false;
+        }
         for(int i = 0; i < VE2PE[VEindex].size() - 1; i ++){
             int sour = (Integer) VE2PE[VEindex].get(i);
             int des = (Integer) VE2PE[VEindex].get(i + 1);
             PGFreeBandwidth[sour][des] -= Bandwidth;
             PGFreeBandwidth[des][sour] -= Bandwidth;
-            if (PGFreeBandwidth[sour][des] < 0) {
-                Successed = false;
-                System.out.println("When Not Successed From  "+sour + "  To  " + des +"  Left BD"+ PGFreeBandwidth[sour][des]);
-            }
         }
         return Successed;
     }
@@ -194,6 +220,19 @@ public class ARAlgorithm extends Algorithm{
         if(FreeBD/BD < LimitRatio)
             Successed = false;
         return Successed;
+    }
+
+    // check if  a  path sufficate bandwidth limit
+    public boolean CheckPathBD(List Path, double bandwidth){
+        if(Path.size() == 0)
+            return true;
+        for(int i = 0; i < Path.size() - 1; i ++){
+            int from = (Integer) Path.get(i);
+            int to = (Integer) Path.get(i+1);
+            if(PGFreeBandwidth[from][to] < bandwidth)
+                return false;
+        }
+        return true;
     }
 
     public void RestructVN(String path){
@@ -294,7 +333,7 @@ public class ARAlgorithm extends Algorithm{
         }finally {
             scanner.close();
         }
-
+        /*
         kill++;
         if(kill == 10){
             System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -305,7 +344,7 @@ public class ARAlgorithm extends Algorithm{
                 }
             }
         }
-
+        */
     }
 
     // add  bandwidth revenue from same node
@@ -318,6 +357,23 @@ public class ARAlgorithm extends Algorithm{
             }
         }
         return HidenRevenue;
+    }
+
+    public int PNodeUsed(){
+        int res = 0;
+        for(int i = 0; i < utils.PG.Node; i ++){
+            if(Math.abs(PGFreeCapacity[i] - utils.PG.NodeCapacity[i]) > 0.000001)
+                res ++;
+        }
+        return res;
+    }
+
+    public int MaxPathLength(){
+        int res = 0;
+        for(int i = 0; i < VE2PE.length; i ++)
+            if(VE2PE[i].size() > res)
+                res = VE2PE[i].size();
+        return res;
     }
 
     public static void main(String[] args){

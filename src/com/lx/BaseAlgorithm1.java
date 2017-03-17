@@ -1,6 +1,7 @@
 package com.lx;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.management.MonitorInfo;
@@ -37,7 +38,7 @@ public class BaseAlgorithm1 extends Algorithm{
         }
     }
 
-    public void Deploy(){
+    public void Deploy(String log){
         Queue<Link> Linkqueue = new PriorityQueue<>(Link.comparator);
         for(int i = 0; i < utils.VG.Node; i ++) {
             for (int j = i; j < utils.VG.Node; j++) {
@@ -56,6 +57,7 @@ public class BaseAlgorithm1 extends Algorithm{
             if(VN2PN[i] != -1 && VN2PN[j] != -1){
                 Successed = TwoNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),path);
                 if(Successed == false) {
+                    BDfailcost += utils.VG.EdgeCapacity[i][j];
                     System.out.println("Type 1 failed  there is not enougn BD from " + VN2PN[i] + "  to  " + VN2PN[j]);
                     continue;
                 }
@@ -68,6 +70,7 @@ public class BaseAlgorithm1 extends Algorithm{
                     }
                     VE2PE[VEindex] = new ArrayList(path);
                     VEBandwidth[VEindex] = utils.VG.EdgeCapacity[i][j];
+                    BDcost += utils.VG.EdgeCapacity[i][j] * VE2PE[VEindex].size();
                     System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 1");
                 }
             }
@@ -77,6 +80,7 @@ public class BaseAlgorithm1 extends Algorithm{
                 else
                     Successed = OneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),j,VN2PN[i],path);
                 if(Successed == false) {
+                    BDfailcost += utils.VG.EdgeCapacity[i][j];
                     System.out.println("Type 2 failed  cant find appropriate path " + i + "  to  " + j);
                     continue;
                 }
@@ -98,6 +102,7 @@ public class BaseAlgorithm1 extends Algorithm{
                     }
                     VE2PE[VEindex] = new ArrayList(path);
                     VEBandwidth[VEindex] = utils.VG.EdgeCapacity[i][j];
+                    BDcost += utils.VG.EdgeCapacity[i][j] * VE2PE[VEindex].size();
                     System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 2");
                 }
             }
@@ -115,6 +120,7 @@ public class BaseAlgorithm1 extends Algorithm{
                                 queue1.offer(new Pair(ComputeAllFreeBD(k),k));
                         }
                         if(queue1.isEmpty()){
+                            BDfailcost += utils.VG.EdgeCapacity[i][j];
                             System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
                             continue;
                         }
@@ -129,6 +135,7 @@ public class BaseAlgorithm1 extends Algorithm{
                                 queue2.offer(new Pair(ComputeAllFreeBD(k),k));
                         }
                         if(queue2.isEmpty()){
+                            BDfailcost += utils.VG.EdgeCapacity[i][j];
                             System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
                             continue;
                         }
@@ -141,6 +148,7 @@ public class BaseAlgorithm1 extends Algorithm{
                         List<Integer> remaplist = new ArrayList<>();
                         boolean res = TwoNodeDeployed(newlink,remaplist);
                         if (!res){
+                            BDfailcost += utils.VG.EdgeCapacity[i][j];
                             System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
                             continue;
                         }
@@ -153,10 +161,11 @@ public class BaseAlgorithm1 extends Algorithm{
                             }
                             VE2PE[VEindex] = new ArrayList(remaplist);
                             VEBandwidth[VEindex] = utils.VG.EdgeCapacity[i][j];
+                            BDcost += utils.VG.EdgeCapacity[i][j] * VE2PE[VEindex].size();
                             System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 3  fail-tactics");
                         }
                     }
-                    System.out.println("Type 3 failed  cant find appropriate path " +  i  +"  to  " + j);
+                    //System.out.println("Type 3 failed  cant find appropriate path " +  i  +"  to  " + j);
                     continue;
                 }
                 else{
@@ -183,11 +192,33 @@ public class BaseAlgorithm1 extends Algorithm{
                     VE2PE[VEindex].add(minid);
                     VE2PE[VEindex].add(maxid);
                     VEBandwidth[VEindex] = utils.VG.EdgeCapacity[i][j];
+                    BDcost += utils.VG.EdgeCapacity[i][j] * VE2PE[VEindex].size();
                     System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!! by type 3");
                 }
 
             }
             VEindex ++;
+        }
+        // log the cost of deploy
+        int Pnodeused = PNodeUsed();
+        String ResultFile = log;
+        PrintWriter out = null;
+
+        FileWriter file = null;
+        try {
+            file = new FileWriter(ResultFile,true);
+            out = new PrintWriter(file);
+            out.print("" + Pnodeused + "    ");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            out.close();
+            try {
+                file.close();
+            } catch (IOException e) {
+                System.out.println("close file error in ADD Pnode cost to result");
+                e.printStackTrace();
+            }
         }
 
     }
@@ -339,6 +370,23 @@ public class BaseAlgorithm1 extends Algorithm{
         list.add(From);
         Collections.reverse(list);
         return true;
+    }
+
+    public int PNodeUsed(){
+        int res = 0;
+        for(int i = 0; i < utils.PG.Node; i ++){
+            if(Math.abs(PGFreeCapacity[i] - utils.PG.NodeCapacity[i]) > 0.000001)
+                res ++;
+        }
+        return res;
+    }
+
+    public int MaxPathLength(){
+        int res = 0;
+        for(int i = 0; i < VE2PE.length; i ++)
+            if(VE2PE[i].size() > res)
+                res = VE2PE[i].size();
+        return res;
     }
 
     //Compute a Pnode，s all free bd

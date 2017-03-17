@@ -36,7 +36,7 @@ public class BaseAlgorithm extends Algorithm{
         }
     }
 
-    public void Deploy(){
+    public void Deploy(String log){
         // sort PG Free Capacity , with two parameter(cap, id)
         List<Pair> PGLeftCap = new ArrayList<>();
         for(int i = 0; i < utils.PG.Node; i ++){
@@ -61,6 +61,7 @@ public class BaseAlgorithm extends Algorithm{
                 Indexofhost ++;
             PGLeftCap.get(Indexofhost).Capacity -= VCapacity;
             VN2PN[VNode] = PGLeftCap.get(Indexofhost).Id;
+            PGFreeCapacity[PGLeftCap.get(Indexofhost).Id] -= VCapacity;
         }
 
         // deploy VEdges
@@ -70,15 +71,40 @@ public class BaseAlgorithm extends Algorithm{
                 if (utils.VG.EdgeCapacity[i][j] > 0){
                     boolean res = DeployVPath(VN2PN[i], VN2PN[j],utils.VG.EdgeCapacity[i][j],VEindex);
                     if (res == false){
+                        BDfailcost += utils.VG.EdgeCapacity[i][j];
                         System.out.println("Deploy Virtual Edge " + i + " " + j + "Not Successed!");
                     }
-                    else
+                    else {
+                        BDcost += utils.VG.EdgeCapacity[i][j] * VE2PE[VEindex].size();
                         System.out.println("Deploy Virtual Edge " + i + " " + j + "Successed!!!!!!!!!!!!!!!!!!!!");
+                    }
                     VEindex ++;
                 }
             }
         }
-        System.out.println("asdfg");
+        // log the cost of deploy
+        int Pnodeused = PNodeUsed();
+        String ResultFile = log;
+        PrintWriter out = null;
+
+        FileWriter file = null;
+        try {
+            file = new FileWriter(ResultFile,true);
+            out = new PrintWriter(file);
+            out.print("" + Pnodeused + "    ");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            out.close();
+            try {
+                file.close();
+            } catch (IOException e) {
+                System.out.println("close file error in ADD Pnode cost to result");
+                e.printStackTrace();
+            }
+        }
+
+
     }
 
     public boolean DeployVPath(int From, int To, double Bandwidth, int VEindex){
@@ -149,6 +175,23 @@ public class BaseAlgorithm extends Algorithm{
             }
         }
         return Successed;
+    }
+
+    public int PNodeUsed(){
+        int res = 0;
+        for(int i = 0; i < utils.PG.Node; i ++){
+            if(Math.abs(PGFreeCapacity[i] - utils.PG.NodeCapacity[i]) > 0.000001)
+                res ++;
+        }
+        return res;
+    }
+
+    public int MaxPathLength(){
+        int res = 0;
+        for(int i = 0; i < VE2PE.length; i ++)
+            if(VE2PE[i].size() > res)
+                res = VE2PE[i].size();
+        return res;
     }
 
     public void RestructVN(String path){

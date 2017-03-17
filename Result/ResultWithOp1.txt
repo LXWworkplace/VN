@@ -18,3 +18,19 @@ Execute with case 2 With Op  1 ExecuteTime 1.092924248
 In this loop the revenue is   887.1415854242485
 Execute with case 2 With Op  1 ExecuteTime 1.215396484
 In this loop the revenue is   752.8383712574986
+Execute with case 2 With Op  1 ExecuteTime 1.454863331
+In this loop the revenue is   190.77161450869926
+Execute with case 2 With Op  1 ExecuteTime 0.875374784
+In this loop the revenue is   652.071786234151
+Execute with case 2 With Op  1 ExecuteTime 0.854665607
+In this loop the revenue is   1748.860119376443
+Execute with case 2 With Op  1
+0    0    25    25    25    25    25    25    25    25    
+In this loop the revenue is   1276.3354450921256   BDcost is   2749.6946661686384 ExecuteTime 1.227499498
+Execute with case 2 With Op  1
+0    0    10    26    26    26    26    26    26    26    
+In this loop the revenue is   537.3391853228136   BDcost is   45987.074284866925 ExecuteTime 1.306234877
+Execute with case 2 With Op  1
+0    0    Execute with case 2 With Op  1
+22    41    26    26    8    37    19    35    29    17    
+In this loop the revenue is   771.7891239958699   BDcost is   84472.85851087354 ExecuteTime 1.820198774

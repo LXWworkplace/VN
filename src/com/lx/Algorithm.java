@@ -6,9 +6,15 @@ import java.io.*;
  * Created by lx on 17-3-1.
  */
 public class Algorithm {
+    public double BDcost;
+    public double BDfailcost;
 
+    public Algorithm(){
+        BDcost = 0;
+        BDfailcost = 0;
+    }
 
-    public void Deploy(){
+    public void Deploy(String log){
 
     }
 
@@ -22,6 +28,15 @@ public class Algorithm {
 
     public void KillLiveVN(String path){
 
+    }
+    public int PNodeUsed(){
+        int res = 0;
+        return res;
+    }
+
+    public int MaxPathLength(){
+        int res = 0;
+        return res;
     }
 
     // for test

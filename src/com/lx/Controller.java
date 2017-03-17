@@ -14,7 +14,7 @@ public class Controller {
         this.RG = RG;
     }
 
-    public double Mapping(int op, String Resutlt) throws FileNotFoundException {
+    public double[] Mapping(int op, String Resutlt) throws FileNotFoundException {
         String ResultPath = Resutlt;
         double revenue = 0;
         Algorithm algorithm;
@@ -26,7 +26,7 @@ public class Controller {
             line = scanner.nextLine();
         else {
             System.out.println("when read from outputRGresult, it is null");
-            return -1;
+            return new double[2];
         }
         String[] linearray = line.split(" ");
         utils.setPGPath((RG.PGfolderpath+"/" + RG.PGfile));
@@ -49,7 +49,7 @@ public class Controller {
             default:
                 algorithm = new MergeVNAlgorithm(utils);
         }
-        algorithm.Deploy();
+        algorithm.Deploy(ResultPath);
         revenue += algorithm.AddVNlog();
         while(scanner.hasNextLine()){
             line = scanner.nextLine();
@@ -57,7 +57,7 @@ public class Controller {
             // add VN
             if(linearray[0].equals("add")){
                 algorithm.RestructVN((RG.VGfolderpath+"/" + linearray[1]));
-                algorithm.Deploy();
+                algorithm.Deploy(ResultPath);
                 algorithm.AddVNlog();
             }
             // kill VN
@@ -66,7 +66,12 @@ public class Controller {
                 algorithm.KillLiveVN(logpath);
             }
         }
-        return revenue;
+
+        double res[] = new double[2];
+        //res[0] = algorithm.BDcost + algorithm.BDfailcost * algorithm.MaxPathLength();
+        res[0] = algorithm.BDcost + algorithm.BDfailcost * 10;
+        res[1] = revenue;
+        return res;
     }
 
     public static void main(String[] args){
@@ -77,7 +82,7 @@ public class Controller {
         String PGfolderpath = "/home/lx/Brite/PNet";
         String VGfolderpath = "/home/lx/Brite/VNet";
         String outputRGresult = "/home/lx/VN/RGoutput/RGresult.txt";
-        double revenue = 0;
+        double res[] = new double[2];
         ReqGenerator RG = new ReqGenerator(aCase,maxVnetNum,LimitVnet,PGfile,PGfolderpath,VGfolderpath,outputRGresult);
         //RG.NewGenerate();
         RG.Generate();
@@ -93,13 +98,23 @@ public class Controller {
             FileWriter file = null;
             try {
                 file = new FileWriter(ResultFile,true);
+                out = new PrintWriter(file);
+                out.println("Execute with case "+ aCase + " With Op  "+ i);
             } catch (IOException e) {
                 e.printStackTrace();
+            }finally {
+                out.close();
+                try {
+                    file.close();
+                } catch (IOException e) {
+                    System.out.println("close file error in ADD title to result");
+                    e.printStackTrace();
+                }
             }
 
             // Execute
             try {
-                revenue = controller.Mapping(i,ResultFile);
+                res = controller.Mapping(i,ResultFile);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -108,9 +123,10 @@ public class Controller {
 
             // ADD ExecuteTime, revenue to result
             try {
+                file = new FileWriter(ResultFile,true);
                 out = new PrintWriter(file);
-                out.println("Execute with case "+ aCase + " With Op  "+ i + " ExecuteTime "+ ExecuteTime);
-                out.println("In this loop the revenue is   " +(revenue / ExecuteTime));
+                out.println();
+                out.println("In this loop the revenue is   " +(res[1] / ExecuteTime)+ "   BDcost is   " + res[0] + " ExecuteTime "+ ExecuteTime);
             }catch (Exception e){
                 System.out.println("Add ExecutionTime occur a Exception");
                 e.printStackTrace();
