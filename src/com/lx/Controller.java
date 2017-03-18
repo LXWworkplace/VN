@@ -26,7 +26,7 @@ public class Controller {
             line = scanner.nextLine();
         else {
             System.out.println("when read from outputRGresult, it is null");
-            return new double[2];
+            return new double[4];
         }
         String[] linearray = line.split(" ");
         utils.setPGPath((RG.PGfolderpath+"/" + RG.PGfile));
@@ -67,10 +67,12 @@ public class Controller {
             }
         }
 
-        double res[] = new double[2];
+        double res[] = new double[4];
         //res[0] = algorithm.BDcost + algorithm.BDfailcost * algorithm.MaxPathLength();
         res[0] = algorithm.BDcost + algorithm.BDfailcost * 10;
         res[1] = revenue;
+        res[2] = algorithm.VNmapped / 10;
+        res[3] = algorithm.Vlinkmapped/algorithm.Vlinksum;
         return res;
     }
 
@@ -126,7 +128,7 @@ public class Controller {
                 file = new FileWriter(ResultFile,true);
                 out = new PrintWriter(file);
                 out.println();
-                out.println("In this loop the revenue is   " +(res[1] / ExecuteTime)+ "   BDcost is   " + res[0] + " ExecuteTime "+ ExecuteTime);
+                out.println("In this loop the revenue is   " +(res[1] / ExecuteTime)+ "   BDcost is   " + res[0] + "   ExecuteTime   "+ ExecuteTime + "  VNmappedratio  " + res[2] + "  VLinkmapped ratio  " + res[3]);
             }catch (Exception e){
                 System.out.println("Add ExecutionTime occur a Exception");
                 e.printStackTrace();

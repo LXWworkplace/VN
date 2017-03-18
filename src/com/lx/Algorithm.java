@@ -6,12 +6,19 @@ import java.io.*;
  * Created by lx on 17-3-1.
  */
 public class Algorithm {
-    public double BDcost;
-    public double BDfailcost;
+    public double BDcost;               // the successed mapped link cost * dist
+    public double BDfailcost;           // the unsuccessed mapped link cost
+
+    public double VNmapped;
+    public double Vlinkmapped;
+    public double Vlinksum;
 
     public Algorithm(){
         BDcost = 0;
         BDfailcost = 0;
+        VNmapped = 0;
+        Vlinkmapped = 0;
+        Vlinksum = 0;
     }
 
     public void Deploy(String log){

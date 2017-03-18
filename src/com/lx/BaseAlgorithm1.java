@@ -48,6 +48,7 @@ public class BaseAlgorithm1 extends Algorithm{
             }
         }
         int VEindex = 0;
+        int falsevlinkmapped = 0;
         while(Linkqueue.isEmpty() == false){
             Link Linktmp = Linkqueue.poll();
             int i = Linktmp.From;
@@ -58,6 +59,7 @@ public class BaseAlgorithm1 extends Algorithm{
                 Successed = TwoNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),path);
                 if(Successed == false) {
                     BDfailcost += utils.VG.EdgeCapacity[i][j];
+                    falsevlinkmapped ++;
                     System.out.println("Type 1 failed  there is not enougn BD from " + VN2PN[i] + "  to  " + VN2PN[j]);
                     continue;
                 }
@@ -81,6 +83,7 @@ public class BaseAlgorithm1 extends Algorithm{
                     Successed = OneNodeDeployed(new Link(i,j,utils.VG.EdgeCapacity[i][j]),j,VN2PN[i],path);
                 if(Successed == false) {
                     BDfailcost += utils.VG.EdgeCapacity[i][j];
+                    falsevlinkmapped ++;
                     System.out.println("Type 2 failed  cant find appropriate path " + i + "  to  " + j);
                     continue;
                 }
@@ -121,6 +124,7 @@ public class BaseAlgorithm1 extends Algorithm{
                         }
                         if(queue1.isEmpty()){
                             BDfailcost += utils.VG.EdgeCapacity[i][j];
+                            falsevlinkmapped ++;
                             System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
                             continue;
                         }
@@ -136,6 +140,7 @@ public class BaseAlgorithm1 extends Algorithm{
                         }
                         if(queue2.isEmpty()){
                             BDfailcost += utils.VG.EdgeCapacity[i][j];
+                            falsevlinkmapped ++;
                             System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
                             continue;
                         }
@@ -149,6 +154,7 @@ public class BaseAlgorithm1 extends Algorithm{
                         boolean res = TwoNodeDeployed(newlink,remaplist);
                         if (!res){
                             BDfailcost += utils.VG.EdgeCapacity[i][j];
+                            falsevlinkmapped ++;
                             System.out.println("Type 3 failed again by fail-tactics find appropriate path " +  i  +"  to  " + j);
                             continue;
                         }
@@ -199,8 +205,20 @@ public class BaseAlgorithm1 extends Algorithm{
             }
             VEindex ++;
         }
+        if(falsevlinkmapped == 0){
+            VNmapped ++;
+            Vlinkmapped += utils.VG.Edge;
+            Vlinksum += utils.VG.Edge;
+        }
+        else{
+            Vlinkmapped += (utils.VG.Edge - falsevlinkmapped);
+            Vlinksum += utils.VG.Edge;
+        }
         // log the cost of deploy
         int Pnodeused = PNodeUsed();
+        double PNodeBalanceRatio = ComputePnodeBalanceRatio();
+        double PLinkBalanceRatio = ComputePLinkBalanceRatio();
+        double BalanceRatio = PLinkBalanceRatio * PNodeBalanceRatio;
         String ResultFile = log;
         PrintWriter out = null;
 
@@ -208,7 +226,7 @@ public class BaseAlgorithm1 extends Algorithm{
         try {
             file = new FileWriter(ResultFile,true);
             out = new PrintWriter(file);
-            out.print("" + Pnodeused + "    ");
+            out.println(Pnodeused + "    " +PNodeBalanceRatio + "   " + PLinkBalanceRatio + "   " + BalanceRatio);
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -387,6 +405,41 @@ public class BaseAlgorithm1 extends Algorithm{
             if(VE2PE[i].size() > res)
                 res = VE2PE[i].size();
         return res;
+    }
+
+    //used for compute balanceratio
+    public double ComputePnodeBalanceRatio(){
+        int count = 0;
+        double max = 0;
+        double sum = 0;
+        for(int i = 0 ; i < utils.PG.Node; i ++){
+            if(utils.PG.NodeCapacity[i] - PGFreeCapacity[i] > 0.000001){
+                sum += PGFreeCapacity[i];
+                count ++;
+                if(PGFreeCapacity[i] > max)
+                    max = PGFreeCapacity[i];
+            }
+        }
+        return max/(sum/count);
+    }
+
+    public double ComputePLinkBalanceRatio(){
+        int count = 0;
+        double max = 0;
+        double sum = 0;
+        for(int i = 0; i < utils.PG.Node; i++){
+            for(int j = i + 1; j < utils.PG.Node; j ++){
+                if(utils.PG.EdgeCapacity[i][j] > 0){
+                    if(utils.PG.EdgeCapacity[i][j] - PGFreeBandwidth[i][j] > 0.000001){
+                        sum += PGFreeBandwidth[i][j];
+                        count ++;
+                        if(PGFreeBandwidth[i][j] > max)
+                            max = PGFreeBandwidth[i][j];
+                    }
+                }
+            }
+        }
+        return max/(sum/count);
     }
 
     //Compute a Pnode，s all free bd

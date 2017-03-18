@@ -66,12 +66,14 @@ public class BaseAlgorithm extends Algorithm{
 
         // deploy VEdges
         int VEindex = 0;
+        int falsevlinkmapped = 0;
         for(int i = 0; i < utils.VG.Node; i ++){
             for(int j = i; j < utils.VG.Node; j ++){
                 if (utils.VG.EdgeCapacity[i][j] > 0){
                     boolean res = DeployVPath(VN2PN[i], VN2PN[j],utils.VG.EdgeCapacity[i][j],VEindex);
                     if (res == false){
                         BDfailcost += utils.VG.EdgeCapacity[i][j];
+                        falsevlinkmapped ++;
                         System.out.println("Deploy Virtual Edge " + i + " " + j + "Not Successed!");
                     }
                     else {
@@ -82,8 +84,20 @@ public class BaseAlgorithm extends Algorithm{
                 }
             }
         }
+        if(falsevlinkmapped == 0){
+            VNmapped ++;
+            Vlinkmapped += utils.VG.Edge;
+            Vlinksum += utils.VG.Edge;
+        }
+        else{
+            Vlinkmapped += (utils.VG.Edge - falsevlinkmapped);
+            Vlinksum += utils.VG.Edge;
+        }
         // log the cost of deploy
         int Pnodeused = PNodeUsed();
+        double PNodeBalanceRatio = ComputePnodeBalanceRatio();
+        double PLinkBalanceRatio = ComputePLinkBalanceRatio();
+        double BalanceRatio = PLinkBalanceRatio * PNodeBalanceRatio;
         String ResultFile = log;
         PrintWriter out = null;
 
@@ -91,7 +105,7 @@ public class BaseAlgorithm extends Algorithm{
         try {
             file = new FileWriter(ResultFile,true);
             out = new PrintWriter(file);
-            out.print("" + Pnodeused + "    ");
+            out.println(Pnodeused + "    " +PNodeBalanceRatio + "   " + PLinkBalanceRatio + "   " + BalanceRatio);
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -158,12 +172,25 @@ public class BaseAlgorithm extends Algorithm{
             temp = Path[temp];
             pathnode.add(temp);
         }
+        List templist = new ArrayList<Integer>();
+        templist.add(From);
+        for(int i = 0; i < pathnode.size(); i ++){
+            templist.add(pathnode.get(pathnode.size()-i-1));
+        }
+        templist.add(To);
+        if(!CheckPathBD(templist,Bandwidth)){
+            System.out.println("Not Successed From  path not sufficate bandwidth ");
+            return false;
+        }
         VEBandwidth[VEindex] = Bandwidth;
+        /*
         VE2PE[VEindex].add(From);
         for(int i = 0; i < pathnode.size(); i ++){
             VE2PE[VEindex].add(pathnode.get(pathnode.size()-i-1));
         }
         VE2PE[VEindex].add(To);
+        */
+        VE2PE[VEindex] = new ArrayList(templist);
         for(int i = 0; i < VE2PE[VEindex].size() - 1; i ++){
             int sour = (Integer) VE2PE[VEindex].get(i);
             int des = (Integer) VE2PE[VEindex].get(i + 1);
@@ -171,12 +198,13 @@ public class BaseAlgorithm extends Algorithm{
             PGFreeBandwidth[des][sour] -= Bandwidth;
             if (PGFreeBandwidth[sour][des] < 0) {
                 Successed = false;
-                System.out.println("When Not Successed From  "+sour + "  To  " + des +"  Left BD"+ PGFreeBandwidth[sour][des]);
+                System.out.println(" exception occur  When Not Successed From  "+sour + "  To  " + des +"  Left BD"+ PGFreeBandwidth[sour][des]);
             }
         }
         return Successed;
     }
 
+    // used for compute cost
     public int PNodeUsed(){
         int res = 0;
         for(int i = 0; i < utils.PG.Node; i ++){
@@ -192,6 +220,54 @@ public class BaseAlgorithm extends Algorithm{
             if(VE2PE[i].size() > res)
                 res = VE2PE[i].size();
         return res;
+    }
+
+    //used for compute balanceratio
+    public double ComputePnodeBalanceRatio(){
+        int count = 0;
+        double max = 0;
+        double sum = 0;
+        for(int i = 0 ; i < utils.PG.Node; i ++){
+            if(utils.PG.NodeCapacity[i] - PGFreeCapacity[i] > 0.000001){
+                sum += PGFreeCapacity[i];
+                count ++;
+                if(PGFreeCapacity[i] > max)
+                    max = PGFreeCapacity[i];
+            }
+        }
+        return max/(sum/count);
+    }
+
+    public double ComputePLinkBalanceRatio(){
+        int count = 0;
+        double max = 0;
+        double sum = 0;
+        for(int i = 0; i < utils.PG.Node; i++){
+            for(int j = i + 1; j < utils.PG.Node; j ++){
+                if(utils.PG.EdgeCapacity[i][j] > 0){
+                    if(utils.PG.EdgeCapacity[i][j] - PGFreeBandwidth[i][j] > 0.000001){
+                        sum += PGFreeBandwidth[i][j];
+                        count ++;
+                        if(PGFreeBandwidth[i][j] > max)
+                            max = PGFreeBandwidth[i][j];
+                    }
+                }
+            }
+        }
+        return max/(sum/count);
+    }
+
+    // check if  a  path sufficate bandwidth limit
+    public boolean CheckPathBD(List Path, double bandwidth){
+        if(Path.size() == 0)
+            return true;
+        for(int i = 0; i < Path.size() - 1; i ++){
+            int from = (Integer) Path.get(i);
+            int to = (Integer) Path.get(i+1);
+            if(PGFreeBandwidth[from][to] < bandwidth)
+                return false;
+        }
+        return true;
     }
 
     public void RestructVN(String path){

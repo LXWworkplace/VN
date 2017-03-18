@@ -90,12 +90,14 @@ public class Yen_ARAlgorithm extends Algorithm{
 
         // deploy VEdges
         int VEindex = 0;
+        int falsevlinkmapped = 0;
         for(int i = 0; i < utils.VG.Node; i ++){
             for(int j = i; j < utils.VG.Node; j ++){
                 if (utils.VG.EdgeCapacity[i][j] > 0){
                     boolean res = DeployVPath(VN2PN[i], VN2PN[j],utils.VG.EdgeCapacity[i][j],VEindex);
                     if (res == false){
                         BDfailcost += utils.VG.EdgeCapacity[i][j];
+                        falsevlinkmapped ++;
                         System.out.println("Deploy Virtual Edge " + i + " " + j + "Not Successed!");
                     }
                     else {
@@ -106,9 +108,21 @@ public class Yen_ARAlgorithm extends Algorithm{
                 }
             }
         }
+        if(falsevlinkmapped == 0){
+            VNmapped ++;
+            Vlinkmapped += utils.VG.Edge;
+            Vlinksum += utils.VG.Edge;
+        }
+        else{
+            Vlinkmapped += (utils.VG.Edge - falsevlinkmapped);
+            Vlinksum += utils.VG.Edge;
+        }
 
         // log the cost of deploy
         int Pnodeused = PNodeUsed();
+        double PNodeBalanceRatio = ComputePnodeBalanceRatio();
+        double PLinkBalanceRatio = ComputePLinkBalanceRatio();
+        double BalanceRatio = PLinkBalanceRatio * PNodeBalanceRatio;
         String ResultFile = log;
         PrintWriter out = null;
 
@@ -116,7 +130,7 @@ public class Yen_ARAlgorithm extends Algorithm{
         try {
             file = new FileWriter(ResultFile,true);
             out = new PrintWriter(file);
-            out.print("" + Pnodeused + "    ");
+            out.println(Pnodeused + "    " +PNodeBalanceRatio + "   " + PLinkBalanceRatio + "   " + BalanceRatio);
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -370,6 +384,41 @@ public class Yen_ARAlgorithm extends Algorithm{
             if(VE2PE[i].size() > res)
                 res = VE2PE[i].size();
         return res;
+    }
+
+    //used for compute balanceratio
+    public double ComputePnodeBalanceRatio(){
+        int count = 0;
+        double max = 0;
+        double sum = 0;
+        for(int i = 0 ; i < utils.PG.Node; i ++){
+            if(utils.PG.NodeCapacity[i] - PGFreeCapacity[i] > 0.000001){
+                sum += PGFreeCapacity[i];
+                count ++;
+                if(PGFreeCapacity[i] > max)
+                    max = PGFreeCapacity[i];
+            }
+        }
+        return max/(sum/count);
+    }
+
+    public double ComputePLinkBalanceRatio(){
+        int count = 0;
+        double max = 0;
+        double sum = 0;
+        for(int i = 0; i < utils.PG.Node; i++){
+            for(int j = i + 1; j < utils.PG.Node; j ++){
+                if(utils.PG.EdgeCapacity[i][j] > 0){
+                    if(utils.PG.EdgeCapacity[i][j] - PGFreeBandwidth[i][j] > 0.000001){
+                        sum += PGFreeBandwidth[i][j];
+                        count ++;
+                        if(PGFreeBandwidth[i][j] > max)
+                            max = PGFreeBandwidth[i][j];
+                    }
+                }
+            }
+        }
+        return max/(sum/count);
     }
 
     public void RestructVN(String path){
